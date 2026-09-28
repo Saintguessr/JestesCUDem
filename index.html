@@ -104,6 +104,9 @@ if(S.v<3){var I={"Siłownia":["🏋️",0],"10 tysięcy kroków":["👟",0],"Zer
 G.forEach(function(g){S.items[g.k].forEach(function(x){if(I[x.t]&&!x.i){x.i=I[x.t][0];x.x=!!I[x.t][1]}})});
 [["Trening szachowy","♟️"],["Saksofon","🎷"]].forEach(function(a){if(!S.items.u.some(function(x){return x.t==a[0]}))S.items.u.push({id:S.next++,t:a[0],i:a[1],g:"",x:false})});
 S.v=3;save()}
+if(S.v<4){S.items.d.forEach(function(x){if(x.t=="Medytacja")x.i="😇"});
+if(!S.items.u.some(function(x){return x.t=="Nauka włoskiego"}))S.items.u.push({id:S.next++,t:"Nauka włoskiego",i:"🇮🇹",g:"",x:false});
+S.v=4;save()}
 }
 function save(){try{localStorage.setItem("cudem",JSON.stringify(S))}catch(e){}}
 function isDone(id){return(S.done[today]||[]).indexOf(id)>-1}
