@@ -5,22 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jesteś CUDem</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0047ab">
+<meta name="theme-color" content="#00225c">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="CUDem">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Dancing+Script:wght@600&display=swap">
 <style>
-:root{box-sizing:border-box;background:#0047ab;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#0047ab;--fg:#fff;--mut:#bcd0f5;--card:rgba(0,22,80,.5);--line:rgba(255,255,255,.2);--c:#ffd23f;--u:#4fdc86;--d:#8ab8ff;--m:#ff6b6b}
+:root{box-sizing:border-box;background:#00225c;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#00225c;--fg:#fff;--mut:#bcd0f5;--card:rgba(0,10,45,.5);--line:rgba(255,255,255,.2);--c:#ffd23f;--u:#4fdc86;--d:#8ab8ff;--m:#ff6b6b}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(160deg,#0a56c8,#0047ab 45%,#00296e) fixed;min-height:100vh;color:var(--fg);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif}
+body{margin:0;background:linear-gradient(160deg,#003080,#00225c 45%,#00133a) fixed;min-height:100vh;color:var(--fg);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif}
 main{max-width:520px;margin:0 auto;padding:20px 16px 40px}
 .hi{font-family:"Dancing Script","Segoe Script","Brush Script MT",cursive;font-size:2.1rem;font-weight:600;color:#ffe27a;line-height:1}
 h1{font-size:2.2rem;margin:0;letter-spacing:-.5px;font-weight:800}
 h1 .c{color:var(--c)}h1 .u{color:var(--u)}h1 .d{color:var(--d)}h1 .m{color:var(--m);font-size:.62em;letter-spacing:0}
-.date{color:var(--mut);margin:2px 0 14px}
+.date{color:var(--mut);margin:2px 0 14px;display:flex;align-items:center;gap:8px}.dl{flex:1;text-align:center;text-transform:capitalize;color:var(--fg)}
+.nv{background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:8px;min-width:38px;height:36px;font:inherit;font-size:1.3rem;cursor:pointer}.nv:disabled{opacity:.3;cursor:default}.nv.td{font-size:.9rem;padding:0 10px}
 .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--line);margin-bottom:6px}
 .bar i{display:block;height:100%;width:0;transition:width .3s}
 .sum{color:var(--mut);font-size:.9rem;margin-bottom:18px}
@@ -38,6 +39,8 @@ section h2 small{font-weight:400;color:var(--mut);font-size:.85rem}
 .ico.x::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:3px;background:var(--m);transform:rotate(-40deg);border-radius:2px}
 .tag{font-size:.75rem;font-weight:700;border:1px solid var(--mut);border-radius:5px;padding:0 4px;margin-left:4px}
 .del{background:none;border:0;color:var(--mut);font-size:1.2rem;padding:4px 8px;cursor:pointer}
+.tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{flex:1;padding:10px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--fg);font:inherit;cursor:pointer}.tabs button.on{background:var(--fg);color:#0a1f52;font-weight:700}
+.st{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.st .nm{flex:1 1 42%}.st .br{flex:1 1 28%;height:6px;background:var(--line);border-radius:3px;overflow:hidden}.st .br i{display:block;height:100%;background:var(--k)}.st b{min-width:4.5em;text-align:right;font-weight:600}
 .empty{color:var(--mut);font-size:.9rem;padding:6px 0}
 form{display:flex;gap:8px;margin-top:8px}
 form input{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:8px;background:rgba(0,20,70,.6);color:var(--fg);font:inherit}
@@ -95,7 +98,9 @@ c:[["Siłownia"],["10 tysięcy kroków"],["Zero słodyczy"],["Zero alkoholu"]],
 u:[["Komputer","💻","NFPZ",1],["Smartfon","📱🌙","",1]],
 d:[["Brewiarz"],["Różaniec"],["Adoracja"],["Medytacja"]],
 m:[["Spokój","🕊️"],["Brak obmowy","🤫"]]};
-var S=null,today=new Date().toISOString().slice(0,10);
+var S=null,V="today",today=ymd(new Date()),cur=today;
+function ymd(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function shift(d,n){var t=new Date(d+"T12:00:00");t.setDate(t.getDate()+n);return ymd(t)}
 function load(){try{S=JSON.parse(localStorage.getItem("cudem"))}catch(e){}
 if(!S||!S.items){S={items:{},done:{}};var id=1;G.forEach(function(g){S.items[g.k]=DEF[g.k].map(function(a){return{id:id++,t:a[0],i:a[1]||"",g:a[2]||"",x:!!a[3]}})});S.next=id;S.v=2}
 if(!S.v){S.v=2;G.forEach(function(g){S.items[g.k].forEach(function(x){if(x.i)x.x=true})});
@@ -109,11 +114,20 @@ if(!S.items.u.some(function(x){return x.t=="Nauka włoskiego"}))S.items.u.push({
 S.v=4;save()}
 }
 function save(){try{localStorage.setItem("cudem",JSON.stringify(S))}catch(e){}}
-function isDone(id){return(S.done[today]||[]).indexOf(id)>-1}
-function toggle(id){var a=S.done[today]||[];var i=a.indexOf(id);if(i>-1)a.splice(i,1);else a.push(id);S.done[today]=a;
-var keys=Object.keys(S.done).sort();while(keys.length>30)delete S.done[keys.shift()];save();render()}
+function isDone(id){return(S.done[cur]||[]).indexOf(id)>-1}
+function toggle(id){var a=S.done[cur]||[];var i=a.indexOf(id);if(i>-1)a.splice(i,1);else a.push(id);S.done[cur]=a;
+save();render()}
+function dayCount(id){var n=0;for(var k in S.done)if(S.done[k].indexOf(id)>-1)n++;return n}
+function pl(n){return n+(n==1?" dzień":" dni")}
+function tabs(){return '<div class="tabs"><button data-tab="today"'+(V=="today"?' class="on"':"")+'>Dziś</button><button data-tab="stats"'+(V=="stats"?' class="on"':"")+'>Statystyki</button></div>'}
+function statsHtml(){var f=today;for(var k in S.done)if(S.done[k].length&&k<f)f=k;var n=Math.floor((new Date(today)-new Date(f))/864e5)+1;
+var o='<div class="sum">Śledzisz od '+f+' ('+pl(n)+'). Liczba dni z wykonanym zadaniem:</div>';
+G.forEach(function(g){o+='<section style="--k:'+g.v+'"><h2>'+g.n+'</h2>';if(!S.items[g.k].length)o+='<div class="empty">Brak zadań.</div>';
+S.items[g.k].forEach(function(x){var c=dayCount(x.id);o+='<div class="st"><span class="nm">'+(x.i?x.i+" ":"")+esc(x.t)+'</span><span class="br"><i style="width:'+Math.min(100,c/n*100)+'%"></i></span><b>'+pl(c)+'</b></div>'});o+="</section>"});return o}
 function esc(s){return s.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function render(){
+var dE=document.getElementById("date");dE.style.display=V=="stats"?"none":"flex";
+dE.innerHTML='<button class="nv" data-d="-1" aria-label="Poprzedni dzień">‹</button><span class="dl">'+new Date(cur+"T12:00:00").toLocaleDateString("pl-PL",{weekday:"long",day:"numeric",month:"long"})+'</span><button class="nv" data-d="1" aria-label="Następny dzień"'+(cur>=today?" disabled":"")+'>›</button>'+(cur!=today?'<button class="nv td" data-d="0">Dziś</button>':"");
 var h="",tot=0,dn=0,bar="";
 G.forEach(function(g){var it=S.items[g.k],d=it.filter(function(x){return isDone(x.id)}).length;tot+=it.length;dn+=d;
 bar+='<i style="background:'+g.v+';width:'+(it.length?d/Math.max(1,0)*0:0)+'%"></i>';
@@ -122,14 +136,14 @@ if(!it.length)h+='<div class="empty">Dodaj pierwsze zadanie.</div>';
 it.forEach(function(x){var ic=x.i?'<span class="ico'+(x.x?' x':'')+'">'+x.i+'</span> ':"";
 h+='<div class="row"><label><input type="checkbox" data-id="'+x.id+'"'+(isDone(x.id)?" checked":"")+'><span>'+ic+esc(x.t)+(x.g?'<span class="tag">'+esc(x.g)+'</span>':"")+'</span></label><button class="del" data-del="'+g.k+':'+x.id+'" aria-label="Usuń '+esc(x.t)+'">×</button></div>'});
 h+='<form data-g="'+g.k+'"><input placeholder="Nowe zadanie" aria-label="Nowe zadanie: '+g.n+'"><button>Dodaj</button></form></section>'});
-document.getElementById("app").innerHTML=h;
+if(V=="stats")h=statsHtml();document.getElementById("app").innerHTML=tabs()+h;
 var b=document.getElementById("bar");b.innerHTML="";
 G.forEach(function(g){var it=S.items[g.k],d=it.filter(function(x){return isDone(x.id)}).length;
 var i=document.createElement("i");i.style.background=g.v;i.style.width=(tot?d/tot*100:0)+"%";b.appendChild(i)});
-document.getElementById("sum").textContent="Dziś: "+dn+" z "+tot}
-document.getElementById("date").textContent=new Date().toLocaleDateString("pl-PL",{weekday:"long",day:"numeric",month:"long"});
+document.getElementById("sum").textContent=(cur==today?"Dziś: ":"Tego dnia: ")+dn+" z "+tot}
+document.getElementById("date").addEventListener("click",function(e){var b=e.target.closest("button");if(!b||b.disabled)return;var n=+b.dataset.d;if(n==0)cur=today;else{var c=shift(cur,n);if(c<=today)cur=c}render()});
 document.getElementById("app").addEventListener("change",function(e){if(e.target.dataset.id)toggle(+e.target.dataset.id)});
-document.getElementById("app").addEventListener("click",function(e){var d=e.target.dataset.del;if(!d)return;var p=d.split(":");
+document.getElementById("app").addEventListener("click",function(e){if(e.target.dataset.tab){V=e.target.dataset.tab;render();return}var d=e.target.dataset.del;if(!d)return;var p=d.split(":");
 S.items[p[0]]=S.items[p[0]].filter(function(x){return x.id!=p[1]});save();render()});
 document.getElementById("app").addEventListener("submit",function(e){e.preventDefault();var f=e.target,v=f.querySelector("input").value.trim();if(!v)return;
 S.items[f.dataset.g].push({id:S.next++,t:v,i:"",g:""});save();render()});
