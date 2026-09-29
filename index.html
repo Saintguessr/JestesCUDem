@@ -20,6 +20,9 @@ main{max-width:520px;margin:0 auto;padding:20px 16px 40px}
 .hi{font-family:"Dancing Script","Segoe Script","Brush Script MT",cursive;font-size:2.1rem;font-weight:600;color:#ffe27a;line-height:1}
 h1{font-size:2.2rem;margin:0;letter-spacing:-.5px;font-weight:800}
 h1 .c{color:var(--c)}h1 .u{color:var(--u)}h1 .d{color:var(--d)}h1 .m{color:var(--m);font-size:.62em;letter-spacing:0}
+.acct{display:flex;justify-content:flex-end;margin-bottom:4px;min-height:30px}
+.acct button{background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:20px;padding:5px 12px;font:inherit;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:6px}
+.acct img{width:20px;height:20px;border-radius:50%}
 .date{color:var(--mut);margin:2px 0 14px;display:flex;align-items:center;gap:8px}.dl{flex:1;text-align:center;text-transform:capitalize;color:var(--fg)}
 .nv{background:transparent;border:1px solid var(--line);color:var(--fg);border-radius:8px;min-width:38px;height:36px;font:inherit;font-size:1.3rem;cursor:pointer}.nv:disabled{opacity:.3;cursor:default}.nv.td{font-size:.9rem;padding:0 10px}
 .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--line);margin-bottom:6px}
@@ -66,6 +69,9 @@ font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;padding:env(saf
 @keyframes pb{to{width:100%}}
 @media (prefers-reduced-motion:reduce){.pb i{animation-duration:.01s}#splash{transition:none}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.13.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div id="splash" role="button" aria-label="Otwórz aplikację">
@@ -85,6 +91,7 @@ font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;padding:env(saf
 <main>
 <div class="hi">Jesteś</div>
 <h1><span class="c">C</span><span class="u">U</span><span class="d">D</span><span class="m">em</span></h1>
+<div class="acct" id="acct"></div>
 <div class="date" id="date"></div>
 <div class="bar" id="bar"></div>
 <div class="sum" id="sum"></div>
@@ -113,7 +120,7 @@ if(S.v<4){S.items.d.forEach(function(x){if(x.t=="Medytacja")x.i="😇"});
 if(!S.items.u.some(function(x){return x.t=="Nauka włoskiego"}))S.items.u.push({id:S.next++,t:"Nauka włoskiego",i:"🇮🇹",g:"",x:false});
 S.v=4;save()}
 }
-function save(){try{localStorage.setItem("cudem",JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem("cudem",JSON.stringify(S))}catch(e){}cloudSave()}
 function isDone(id){return(S.done[cur]||[]).indexOf(id)>-1}
 function toggle(id){var a=S.done[cur]||[];var i=a.indexOf(id);if(i>-1)a.splice(i,1);else a.push(id);S.done[cur]=a;
 save();render()}
@@ -147,6 +154,46 @@ document.getElementById("app").addEventListener("click",function(e){if(e.target.
 S.items[p[0]]=S.items[p[0]].filter(function(x){return x.id!=p[1]});save();render()});
 document.getElementById("app").addEventListener("submit",function(e){e.preventDefault();var f=e.target,v=f.querySelector("input").value.trim();if(!v)return;
 S.items[f.dataset.g].push({id:S.next++,t:v,i:"",g:""});save();render()});
+// ==== KONFIGURACJA FIREBASE: wklej tu dane z konsoli Firebase (Ustawienia projektu -> Twoje aplikacje) ====
+var firebaseConfig={
+  apiKey:"AIzaSyD4gDnrqcsKGYGCJFnSzGgZaqtqsuXi4Uo",
+  authDomain:"jestescudem-e9549.firebaseapp.com",
+  projectId:"jestescudem-e9549",
+  appId:"1:450791782154:web:cc4c07bbc10ec1814e2cf3"
+};
+var cloudReady=false,db=null,auth=null,user=null,saveTimer=null;
+function cloudConfigured(){return firebaseConfig.apiKey.indexOf("WKLEJ_TU")==-1 && firebaseConfig.apiKey.length>10}
+function renderAcct(){
+  var el=document.getElementById("acct");if(!el)return;
+  if(!cloudConfigured()){el.innerHTML="";return}
+  if(user){el.innerHTML='<button id="lo">'+(user.photoURL?'<img src="'+user.photoURL+'">':"")+esc(user.displayName||user.email||"Konto")+' · Wyloguj</button>'}
+  else{el.innerHTML='<button id="li">Zaloguj przez Google</button>'}
+}
+function cloudSave(){
+  if(!cloudReady||!user)return;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    db.collection("users").doc(user.uid).set({items:S.items,done:S.done,next:S.next,v:S.v}).catch(function(e){console.error("cloud save",e)});
+  },600);
+}
+function cloudLoad(){
+  db.collection("users").doc(user.uid).get().then(function(doc){
+    if(doc.exists){var d=doc.data();S={items:d.items,done:d.done||{},next:d.next||1,v:d.v||4};save();cur=today;render()}
+    else{cloudSave()}
+  }).catch(function(e){console.error("cloud load",e)});
+}
+if(cloudConfigured()){
+  try{
+    firebase.initializeApp(firebaseConfig);
+    auth=firebase.auth();db=firebase.firestore();cloudReady=true;
+    auth.onAuthStateChanged(function(u){user=u;renderAcct();if(u)cloudLoad()});
+  }catch(e){console.error("firebase init",e)}
+}
+document.addEventListener("click",function(e){
+  if(e.target.id=="li"){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){alert("Logowanie nie powiodło się: "+e.message)})}
+  if(e.target.id=="lo"){auth.signOut()}
+});
+renderAcct();
 load();render();
 try{if("serviceWorker" in navigator&&location.protocol.indexOf("http")==0)navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}
 (function(){var s=document.getElementById("splash");function off(){s.classList.add("off");setTimeout(function(){s.style.display="none"},700)}
